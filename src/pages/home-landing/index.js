@@ -1,10 +1,11 @@
 import { Geist } from "next/font/google";
-
+import { useRouter } from "next/router";
 const geist = Geist({
   subsets: ["latin"],
 });
 
 export default function Home() {
+  const router = useRouter();
   return (
     <div className={`${geist.className} min-h-screen bg-gradient-to-b from-gray-900 to-black text-white`}>
       <div className="container mx-auto px-4 py-16">
@@ -16,7 +17,7 @@ export default function Home() {
             เพลิดเพลินไปกับเสียงเพลงที่คุณชื่นชอบ พร้อมฟีเจอร์สุดพิเศษที่รอคุณอยู่
           </p>
           <div className="flex gap-4">
-            <button className="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-full font-medium transition-colors">
+            <button onClick={() => router.push("/player")} className="px-8 py-3 bg-purple-600 hover:bg-purple-700 rounded-full font-medium transition-colors">
               เริ่มต้นใช้งาน
             </button>
             <button className="px-8 py-3 border border-purple-600 hover:bg-purple-600/10 rounded-full font-medium transition-colors">
