@@ -32,31 +32,36 @@ export default function Player() {
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
+      const handleTimeUpdate = () => {
+        setCurrentTime(audio.currentTime);
+      };
+
+      const handleLoadedMetadata = () => {
+        setDuration(audio.duration);
+      };
+
+      const handleEnded = () => {
+        const currentIndex = songs.findIndex(song => song.id === currentSong.id);
+        if (currentIndex < songs.length - 1) {
+          setCurrentSong(songs[currentIndex + 1]);
+          setIsPlaying(true);
+        } else {
+          setCurrentSong(songs[0]);
+          setIsPlaying(true);
+        }
+      };
+
       audio.addEventListener('timeupdate', handleTimeUpdate);
       audio.addEventListener('loadedmetadata', handleLoadedMetadata);
       audio.addEventListener('ended', handleEnded);
-    }
-    return () => {
-      if (audio) {
+
+      return () => {
         audio.removeEventListener('timeupdate', handleTimeUpdate);
         audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
         audio.removeEventListener('ended', handleEnded);
-      }
-    };
-  }, []);
-
-  const handleTimeUpdate = () => {
-    setCurrentTime(audioRef.current.currentTime);
-  };
-
-  const handleLoadedMetadata = () => {
-    setDuration(audioRef.current.duration);
-  };
-
-  const handleEnded = () => {
-    setIsPlaying(false);
-    setCurrentTime(0);
-  };
+      };
+    }
+  }, [currentSong, songs]);
 
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
@@ -73,16 +78,29 @@ export default function Player() {
     setIsPlaying(!isPlaying);
   };
 
+//เลือกเวลา
   const handleSeek = (e) => {
-    const seekTime = (e.nativeEvent.offsetX / e.target.offsetWidth) * duration;
-    audioRef.current.currentTime = seekTime;
-    setCurrentTime(seekTime);
+    if (!audioRef.current || !duration) return;
+    
+    const progressBar = e.target;
+    const clickPosition = e.nativeEvent.offsetX;
+    const widthPercentage = (clickPosition / progressBar.offsetWidth) * 100;
+    const seekTime = (widthPercentage / 100) * duration;
+    
+    if (seekTime >= 0 && seekTime <= duration) {
+      audioRef.current.currentTime = seekTime;
+      setCurrentTime(seekTime);
+    }
   };
 
   const handleNext = () => {
     const currentIndex = songs.findIndex(song => song.id === currentSong.id);
     if (currentIndex < songs.length - 1) {
       setCurrentSong(songs[currentIndex + 1]);
+      setIsPlaying(true);
+    } else {
+      setCurrentSong(songs[0]);
+      setIsPlaying(true);
     }
   };
 
@@ -90,8 +108,13 @@ export default function Player() {
     const currentIndex = songs.findIndex(song => song.id === currentSong.id);
     if (currentIndex > 0) {
       setCurrentSong(songs[currentIndex - 1]);
+      setIsPlaying(true);
+    } else {
+      setCurrentSong(songs[songs.length - 1]);
+      setIsPlaying(true);
     }
   };
+ 
 
   return (
     <div className={`${geist.className} min-h-screen bg-gradient-to-b from-gray-900 to-black text-white`}>
